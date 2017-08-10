@@ -3,14 +3,17 @@ from django.shortcuts import render, get_object_or_404
 from .models import Album, Song
 #from django.http import Http404
 
-# Create your views here.
-def index(request):
-    all_albums = Album.objects.all()
-    return render(request, 'music/index.html', {'all_albums' : all_albums})
+# # Create your views here.
+# def index(request):
+#     all_albums = Album.objects.all()
+#     return render(request, 'music/index.html', {'all_albums' : all_albums})
+#
+# def detail(request, album_id):
+#     album = get_object_or_404(Album, pk=album_id)
+#     return render(request, 'music/detail.html', {'album' : album})
+#
 
-def detail(request, album_id):
-    album = get_object_or_404(Album, pk=album_id)
-    return render(request, 'music/detail.html', {'album' : album})
+from django.views import generic
 
 def favorite(request, album_id):
     album = get_object_or_404(Album, pk=album_id)
@@ -22,6 +25,21 @@ def favorite(request, album_id):
             'error_message': "You did not select a valid song",
         })
     else:
-        selected_song.is_favorite = True
+        if selected_song.is_favorite==False:
+            selected_song.is_favorite = True
+        else:
+            selected_song.is_favorite = False
         selected_song.save()
         return render(request, 'music/detail.html', {'album': album})
+
+
+class IndexView(generic.ListView):
+    template_name = 'music/index.html'
+    context_object_name = 'all_albums'
+
+    def get_queryset(self):
+        return Album.objects.all()
+
+class DetailView(generic.DetailView):
+    model = Album
+    template_name = 'music/detail.html'
